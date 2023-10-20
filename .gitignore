@@ -5,8 +5,9 @@ grammar/testData/psi/**/*.*
 !grammar/testData/psi/**/*.diff
 
 grammar/testData/diagnostics/**/*.*
-!grammar/testData/diagnostics/**/*.antlrtree.txt
-!grammar/testData/diagnostics/**/*.diff
+grammar/testData/diagnostics/**/*.antlrtree.txt
+grammar/testData/diagnostics/**/*.diff
+grammar/testData/diagnostics/*.diff
 
 grammar/src/main/java/**/*
 
