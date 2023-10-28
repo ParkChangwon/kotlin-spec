@@ -36,7 +36,8 @@ fragment Hidden: DelimitedComment | LineComment | WS;
 RESERVED: '...';
 DOT: '.';
 COMMA: ',';
-LPAREN: '(' -> pushMode(Inside);
+//LPAREN: '(' -> pushMode(Inside);
+LPAREN: '(';
 RPAREN: ')';
 LSQUARE: '[' -> pushMode(Inside);
 RSQUARE: ']';
@@ -51,6 +52,7 @@ MOD: '%';
 DIV: '/';
 ADD: '+';
 SUB: '-';
+POWER: '^';
 INCR: '++';
 DECR: '--';
 CONJ: '&&';
@@ -103,7 +105,7 @@ FILE: 'file';
 FIELD: 'field';
 PROPERTY: 'property';
 GET: 'get';
-SET: 'set';
+//SET: 'set';
 RECEIVER: 'receiver';
 PARAM: 'param';
 SETPARAM: 'setparam';
@@ -178,11 +180,73 @@ REIFIED: 'reified';
 EXPECT: 'expect';
 ACTUAL: 'actual';
 
+
+
+// Type names
+NATURAL: 'natural';
+INTEGER: 'integer';
+NUMBER: 'number';
+COMPLEX: 'complex';
+
+COLLECTION: 'collection';
+SET: 'set';
+ARRAY: 'array';
+MATRIX: 'matrix';
+
+// Symbol names
+
+ALPHA: 'alpha';
+BETA: 'beta';
+GAMMA: 'gamma';
+DELTA: 'delta';
+EPSILON: 'epsilon';
+OMEGA: 'omega';
+INFINITY: 'infinity';
+PI: 'pi';
+PHI: 'phi';
+THETA: 'theta';
+
+SymbolName
+    : ALPHA
+    | BETA
+    | GAMMA
+    | DELTA
+    | EPSILON
+    | OMEGA
+    | INFINITY
+    | PI
+    | PHI
+    | THETA
+    ;
+
+// Fuction names
+SIN: 'sin';
+COS: 'cos';
+TAN: 'tan';
+SEC: 'sec';
+COSEC: 'cosec';
+COT: 'cot';
+
+LIM: 'lim';
+D_D: 'd_d';
+INTEGRAL: 'integral';
+
+TrigonometricFunctionName
+    : SIN
+    | COS
+    | TAN
+    | SEC
+    | COSEC
+    | COT
+    ;
+
 // SECTION: literals
 
 fragment DecDigit: '0'..'9';
 fragment DecDigitNoZero: '1'..'9';
 fragment DecDigitOrSeparator: DecDigit | '_';
+
+fragment Alphabet: 'a'..'z' | 'A'..'Z';
 
 fragment DecDigits
     : DecDigit DecDigitOrSeparator* DecDigit
@@ -191,24 +255,31 @@ fragment DecDigits
 
 fragment DoubleExponent: [eE] [+-]? DecDigits;
 
-RealLiteral
-    : FloatLiteral
-    | DoubleLiteral
-    ;
+//RealLiteral
+//    : FloatLiteral
+//    | DoubleLiteral
+//    ;
 
-FloatLiteral
-    : DoubleLiteral [fF]
-    | DecDigits [fF]
-    ;
+//FloatLiteral
+//    : DoubleLiteral [fF]
+//    | DecDigits [fF]
+//    ;
 
-DoubleLiteral
-    : DecDigits? '.' DecDigits DoubleExponent?
-    | DecDigits DoubleExponent
-    ;
+//DoubleLiteral
+//    : DecDigits? '.' DecDigits DoubleExponent?
+//    | DecDigits DoubleExponent
+//    ;
 
-IntegerLiteral
-    : DecDigitNoZero DecDigitOrSeparator* DecDigit
-    | DecDigit
+//IntegerLiteral
+//    : DecDigitNoZero DecDigit*
+//    : DecDigitNoZero DecDigitOrSeparator* DecDigit
+//    | DecDigit
+//    ;
+
+Number
+    : DecDigitNoZero DecDigit*
+    | DecDigitNoZero DecDigit* '.' DecDigit* DecDigitNoZero
+    | '0' '.' DecDigit* DecDigitNoZero
     ;
 
 fragment HexDigit: [0-9a-fA-F];
@@ -227,13 +298,13 @@ BinLiteral
     | '0' [bB] BinDigit
     ;
 
-UnsignedLiteral
-    : (IntegerLiteral | HexLiteral | BinLiteral) [uU] [lL]?
-    ;
-
-LongLiteral
-    : (IntegerLiteral | HexLiteral | BinLiteral) [lL]
-    ;
+//UnsignedLiteral
+//    : (IntegerLiteral | HexLiteral | BinLiteral) [uU] [lL]?
+//    ;
+//
+//LongLiteral
+//    : (IntegerLiteral | HexLiteral | BinLiteral) [lL]
+//    ;
 
 BooleanLiteral: 'true'| 'false';
 
@@ -248,9 +319,18 @@ CharacterLiteral
 fragment UnicodeDigit: UNICODE_CLASS_ND;
 
 Identifier
-    : (Letter | '_') (Letter | '_' | UnicodeDigit)*
-    | '`' ~([\r\n] | '`')+ '`'
+//    : Alphabet
+    : NullLiteral
+//    | Alphabet
+//    | Alphabet '_' DecDigitNoZero
+//    | SymbolName
+//    : Letter
+//    | Letter '_' UnicodeDigit
     ;
+//Identifier
+//    : (Letter | '_') (Letter | '_' | UnicodeDigit)*
+//    | '`' ~([\r\n] | '`')+ '`'
+//    ;
 
 IdentifierOrSoftKey
     : Identifier
@@ -289,7 +369,7 @@ IdentifierOrSoftKey
     | VARARG
     | WHERE
     | GET
-    | SET
+//    | SET
     | FIELD
     | PROPERTY
     | RECEIVER
@@ -458,7 +538,7 @@ Inside_FIELD: FIELD -> type(FIELD);
 Inside_FILE: FILE -> type(FILE);
 Inside_PROPERTY: PROPERTY -> type(PROPERTY);
 Inside_GET: GET -> type(GET);
-Inside_SET: SET -> type(SET);
+//Inside_SET: SET -> type(SET);
 Inside_RECEIVER: RECEIVER -> type(RECEIVER);
 Inside_PARAM: PARAM -> type(PARAM);
 Inside_SETPARAM: SETPARAM -> type(SETPARAM);
@@ -510,16 +590,16 @@ Inside_EXPECT: EXPECT -> type(EXPECT);
 Inside_ACTUAL: ACTUAL -> type(ACTUAL);
 
 Inside_BooleanLiteral: BooleanLiteral -> type(BooleanLiteral);
-Inside_IntegerLiteral: IntegerLiteral -> type(IntegerLiteral);
+//Inside_IntegerLiteral: IntegerLiteral -> type(IntegerLiteral);
 Inside_HexLiteral: HexLiteral -> type(HexLiteral);
 Inside_BinLiteral: BinLiteral -> type(BinLiteral);
 Inside_CharacterLiteral: CharacterLiteral -> type(CharacterLiteral);
-Inside_RealLiteral: RealLiteral -> type(RealLiteral);
+//Inside_RealLiteral: RealLiteral -> type(RealLiteral);
 Inside_NullLiteral: NullLiteral -> type(NullLiteral);
-Inside_LongLiteral: LongLiteral -> type(LongLiteral);
-Inside_UnsignedLiteral: UnsignedLiteral -> type(UnsignedLiteral);
+//Inside_LongLiteral: LongLiteral -> type(LongLiteral);
+//Inside_UnsignedLiteral: UnsignedLiteral -> type(UnsignedLiteral);
 
-Inside_Identifier: Identifier -> type(Identifier);
+//Inside_Identifier: Identifier -> type(Identifier);
 Inside_Comment: (LineComment | DelimitedComment) -> channel(HIDDEN);
 Inside_WS: WS -> channel(HIDDEN);
 Inside_NL: NL -> channel(HIDDEN);

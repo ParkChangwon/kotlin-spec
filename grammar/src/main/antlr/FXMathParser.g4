@@ -13,7 +13,49 @@ options { tokenVocab = FXMathLexer; }
 //    ;
 
 fxMathFile
-    : primaryExpression
+//    : (primaryExpression (semis primaryExpression)*)? semis?
+    : (NL+)? (relation (NL+ relation)*)? (NL+)?
+    ;
+
+relation
+    : variable
+//    : expression (relationOperator expression)?
+    ;
+
+expression
+    : sum
+    ;
+
+expressionInParenthesis
+    : LPAREN expression (COMMA expression)* RPAREN
+    ;
+sum
+    : (product | division) (additiveOperator sum)?
+    ;
+
+product
+    : (Number factor* | factor+) (multiplicativeOperator? product)?
+    ;
+
+division
+    : product divideOperator product
+    ;
+
+factor
+    : variable (power | Number)?
+    | expressionInParenthesis power?
+    | Number power
+    ;
+
+power
+    : POWER Number
+    | POWER variable
+    | POWER expressionInParenthesis
+    ;
+
+variable
+    : Identifier
+//    : Identifier
     ;
 
 script
@@ -83,7 +125,7 @@ classParameters
     ;
 
 classParameter
-    : modifiers? (VAL | VAR)? NL* simpleIdentifier COLON NL* type (NL* ASSIGNMENT NL* expression)?
+    : modifiers? (VAL | VAR)? NL* simpleIdentifier COLON NL* type (NL* ASSIGNMENT NL* expr)?
     ;
 
 delegationSpecifiers
@@ -107,7 +149,7 @@ annotatedDelegationSpecifier
     ;
 
 explicitDelegation
-    : (userType | functionType) NL* BY NL* expression
+    : (userType | functionType) NL* BY NL* expr
     ;
 
 typeParameters
@@ -155,7 +197,7 @@ functionValueParameters
     ;
 
 functionValueParameter
-    : parameterModifiers? parameter (NL* ASSIGNMENT NL* expression)?
+    : parameterModifiers? parameter (NL* ASSIGNMENT NL* expr)?
     ;
 
 functionDeclaration
@@ -169,7 +211,7 @@ functionDeclaration
 
 functionBody
     : block
-    | ASSIGNMENT NL* expression
+    | ASSIGNMENT NL* expr
     ;
 
 variableDeclaration
@@ -186,12 +228,12 @@ propertyDeclaration
       (NL* receiverType NL* DOT)?
       (NL* (multiVariableDeclaration | variableDeclaration))
       (NL* typeConstraints)?
-      (NL* (ASSIGNMENT NL* expression | propertyDelegate))?
+      (NL* (ASSIGNMENT NL* expr | propertyDelegate))?
       (NL* SEMICOLON)? NL* (getter? (NL* semi? setter)? | setter? (NL* semi? getter)?)
     ;
 
 propertyDelegate
-    : BY NL* expression
+    : BY NL* expr
     ;
 
 getter
@@ -209,7 +251,7 @@ parametersWithOptionalType
     ;
 
 functionValueParameterWithOptionalType
-    : parameterModifiers? parameterWithOptionalType (NL* ASSIGNMENT NL* expression)?
+    : parameterModifiers? parameterWithOptionalType (NL* ASSIGNMENT NL* expr)?
     ;
 
 parameterWithOptionalType
@@ -322,7 +364,7 @@ statements
     ;
 
 statement
-    : (label | annotation)* ( declaration | assignment | loopStatement | expression)
+    : (label | annotation)* ( declaration | assignment | loopStatement | expr)
     ;
 
 label
@@ -346,19 +388,19 @@ loopStatement
 
 forStatement
     : FOR NL* LPAREN annotation* (variableDeclaration | multiVariableDeclaration)
-      IN expression RPAREN NL* controlStructureBody?
+      IN expr RPAREN NL* controlStructureBody?
     ;
 
 whileStatement
-    : WHILE NL* LPAREN expression RPAREN NL* (controlStructureBody | SEMICOLON)
+    : WHILE NL* LPAREN expr RPAREN NL* (controlStructureBody | SEMICOLON)
     ;
 
 doWhileStatement
-    : DO NL* controlStructureBody? NL* WHILE NL* LPAREN expression RPAREN
+    : DO NL* controlStructureBody? NL* WHILE NL* LPAREN expr RPAREN
     ;
 
 assignment
-    : (directlyAssignableExpression ASSIGNMENT | assignableExpression assignmentAndOperator) NL* expression
+    : (directlyAssignableExpression ASSIGNMENT | assignableExpression assignmentAndOperator) NL* expr
     ;
 
 semi
@@ -371,7 +413,7 @@ semis
 
 // SECTION: expressions
 
-expression
+expr
     : disjunction
     ;
 
@@ -475,7 +517,7 @@ assignableSuffix
     ;
 
 indexingSuffix
-    : LSQUARE NL* expression (NL* COMMA NL* expression)* (NL* COMMA)? NL* RSQUARE
+    : LSQUARE NL* expr (NL* COMMA NL* expr)* (NL* COMMA)? NL* RSQUARE
     ;
 
 navigationSuffix
@@ -499,7 +541,7 @@ valueArguments
     ;
 
 valueArgument
-    : annotation? NL* (simpleIdentifier NL* ASSIGNMENT NL*)? MULT? NL* expression
+    : annotation? NL* (simpleIdentifier NL* ASSIGNMENT NL*)? MULT? NL* expr
     ;
 
 primaryExpression
@@ -520,23 +562,23 @@ primaryExpression
     ;
 
 parenthesizedExpression
-    : LPAREN NL* expression NL* RPAREN
+    : LPAREN NL* expr NL* RPAREN
     ;
 
 collectionLiteral
-    : LSQUARE NL* (expression (NL* COMMA NL* expression)* (NL* COMMA)? NL*)? RSQUARE
+    : LSQUARE NL* (expr (NL* COMMA NL* expr)* (NL* COMMA)? NL*)? RSQUARE
     ;
 
 literalConstant
     : BooleanLiteral
-    | IntegerLiteral
+//    | IntegerLiteral
     | HexLiteral
     | BinLiteral
     | CharacterLiteral
-    | RealLiteral
+//    | RealLiteral
     | NullLiteral
-    | LongLiteral
-    | UnsignedLiteral
+//    | LongLiteral
+//    | UnsignedLiteral
     ;
 
 stringLiteral
@@ -559,7 +601,7 @@ lineStringContent
     ;
 
 lineStringExpression
-    : LineStrExprStart NL* expression NL* RCURL
+    : LineStrExprStart NL* expr NL* RCURL
     ;
 
 multiLineStringContent
@@ -569,7 +611,7 @@ multiLineStringContent
     ;
 
 multiLineStringExpression
-    : MultiLineStrExprStart NL* expression NL* RCURL
+    : MultiLineStrExprStart NL* expr NL* RCURL
     ;
 
 lambdaLiteral
@@ -616,14 +658,14 @@ superExpression
     ;
 
 ifExpression
-    : IF NL* LPAREN NL* expression NL* RPAREN NL*
+    : IF NL* LPAREN NL* expr NL* RPAREN NL*
       ( controlStructureBody
       | controlStructureBody? NL* SEMICOLON? NL* ELSE NL* (controlStructureBody | SEMICOLON)
       | SEMICOLON)
     ;
 
 whenSubject
-    : LPAREN (annotation* NL* VAL NL* variableDeclaration NL* ASSIGNMENT NL*)? expression RPAREN
+    : LPAREN (annotation* NL* VAL NL* variableDeclaration NL* ASSIGNMENT NL*)? expr RPAREN
     ;
 
 whenExpression
@@ -636,13 +678,13 @@ whenEntry
     ;
 
 whenCondition
-    : expression
+    : expr
     | rangeTest
     | typeTest
     ;
 
 rangeTest
-    : inOperator NL* expression
+    : inOperator NL* expr
     ;
 
 typeTest
@@ -662,8 +704,8 @@ finallyBlock
     ;
 
 jumpExpression
-    : THROW NL* expression
-    | (RETURN | RETURN_AT) expression?
+    : THROW NL* expr
+    | (RETURN | RETURN_AT) expr?
     | CONTINUE
     | CONTINUE_AT
     | BREAK
@@ -680,6 +722,12 @@ assignmentAndOperator
     | MULT_ASSIGNMENT
     | DIV_ASSIGNMENT
     | MOD_ASSIGNMENT
+    ;
+
+relationOperator
+    : equalityOperator
+    | comparisonOperator
+    | ASSIGNMENT
     ;
 
 equalityOperator
@@ -713,7 +761,10 @@ additiveOperator
 
 multiplicativeOperator
     : MULT
-    | DIV
+    ;
+
+divideOperator
+    : DIV
     | MOD
     ;
 
